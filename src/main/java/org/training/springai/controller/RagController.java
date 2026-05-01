@@ -18,6 +18,7 @@ import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 @RequestMapping("/api/rag")
 public class RagController {
     private final ChatClient chatClient;
+    private final ChatClient webSearchChatClient;
     private final VectorStore vectorStore;
 
     @Value("classpath:prompts/random-data-system-prompt.st")
@@ -26,50 +27,50 @@ public class RagController {
     @Value("classpath:prompts/hr-data-system-prompt.st")
     Resource hrPromptTemplate;
 
-    public RagController(@Qualifier("chatMemoryClient") ChatClient chatClient, VectorStore vectorStore) {
+    public RagController(@Qualifier("chatMemoryClient") ChatClient chatClient,
+                         @Qualifier("webSearchRAGChatClient") ChatClient webSearchChatClient,
+                         VectorStore vectorStore) {
+        this.webSearchChatClient = webSearchChatClient;
         this.chatClient = chatClient;
         this.vectorStore = vectorStore;
     }
 
     @GetMapping("/chat")
     public String chat(@RequestParam String message, @RequestHeader String username) {
-        SearchRequest searchRequest = SearchRequest.builder()
-                .query(message)
-                .topK(3)  // only top 3 results will be considered
-                .similarityThreshold(0.5)
-                .build();
-        List<Document> data = vectorStore.similaritySearch(searchRequest);
-        String context = data.stream().map(Document::getText).collect(Collectors.joining(System.lineSeparator()));
-        return chatClient.prompt()
-                .user(message)
-                .advisors(advisorSpec -> advisorSpec.param(CONVERSATION_ID, username))
-                .system(promptSpec -> promptSpec.text(promptTemplate).param("documents", context))
-                .call()
-                .content();
+        return ragChat(message, username, promptTemplate);
     }
 
     @GetMapping("/hr-chat")
     public String hrChat(@RequestParam String message, @RequestHeader String username) {
-        SearchRequest searchRequest = SearchRequest.builder()
-                .query(message)
-                .topK(3)  // only top 3 results will be considered
-                .similarityThreshold(0.5)
-                .build();
-        List<Document> data = vectorStore.similaritySearch(searchRequest);
+        return ragChat(message, username, hrPromptTemplate);
+    }
+
+    private String ragChat(String message, String username, Resource template) {
+        List<Document> data = vectorStore.similaritySearch(SearchRequest.builder()
+                .query(message).topK(3).similarityThreshold(0.5).build());
         String context = data.stream().map(Document::getText).collect(Collectors.joining(System.lineSeparator()));
         return chatClient.prompt()
                 .user(message)
                 .advisors(advisorSpec -> advisorSpec.param(CONVERSATION_ID, username))
-                .system(promptSpec -> promptSpec.text(hrPromptTemplate).param("documents", context))
+                .system(promptSpec -> promptSpec.text(template).param("documents", context))
                 .call()
                 .content();
     }
 
-    @GetMapping("/hr-chat2") // advisor does everything  automatically - minor config in Chat memory client config
+    @GetMapping("/hr-chat-automatic") // advisor does everything  automatically - minor config in Chat memory client config
     public String hrChat2(@RequestParam String message, @RequestHeader String username) {
         return chatClient.prompt()
                 .user(message)
                 .advisors(advisorSpec -> advisorSpec.param(CONVERSATION_ID, username))
+                .call()
+                .content();
+    }
+
+    @GetMapping("/web-search")
+    public String webSearch(@RequestParam String message, @RequestHeader String username) {
+        return webSearchChatClient.prompt()
+                .advisors(advisorSpec -> advisorSpec.param(CONVERSATION_ID, username))
+                .user(message)
                 .call()
                 .content();
     }
