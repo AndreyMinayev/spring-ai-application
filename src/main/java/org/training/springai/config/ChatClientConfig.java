@@ -17,7 +17,6 @@ import java.util.List;
 
 @Configuration
 public class ChatClientConfig {
-
     @Value("classpath:prompts/hr-system-prompt.st")
     private Resource hrSystemPrompt;
 

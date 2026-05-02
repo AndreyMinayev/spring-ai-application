@@ -20,10 +20,8 @@ public class RagController {
     private final ChatClient chatClient;
     private final ChatClient webSearchChatClient;
     private final VectorStore vectorStore;
-
     @Value("classpath:prompts/random-data-system-prompt.st")
     Resource promptTemplate;
-
     @Value("classpath:prompts/hr-data-system-prompt.st")
     Resource hrPromptTemplate;
 
@@ -57,7 +55,8 @@ public class RagController {
                 .content();
     }
 
-    @GetMapping("/hr-chat-automatic") // advisor does everything  automatically - minor config in Chat memory client config
+    @GetMapping("/hr-chat-automatic")
+    // advisor does everything  automatically - minor config in Chat memory client config
     public String hrChat2(@RequestParam String message, @RequestHeader String username) {
         return chatClient.prompt()
                 .user(message)

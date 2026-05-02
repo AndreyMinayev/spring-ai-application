@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class EmbeddingConfig {
-
     @Bean
     @Primary
     public OpenAiEmbeddingModel primaryEmbeddingModel(OpenAiApi openAiApi) {

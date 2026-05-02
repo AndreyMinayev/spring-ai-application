@@ -18,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentLoader {
     private final VectorStore vectorStore;
-
     @Value("classpath:data/hr-policy.pdf")
     Resource policyFile;
 

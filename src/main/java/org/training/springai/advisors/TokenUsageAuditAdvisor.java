@@ -10,7 +10,6 @@ import org.springframework.ai.chat.model.ChatResponse;
 
 @Slf4j
 public class TokenUsageAuditAdvisor implements CallAdvisor {
-
     @Override
     public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
         ChatClientResponse chatClientResponse = callAdvisorChain.nextCall(chatClientRequest);

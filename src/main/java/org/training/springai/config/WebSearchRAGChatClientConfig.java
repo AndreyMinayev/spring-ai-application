@@ -16,7 +16,6 @@ import java.util.List;
 
 @Configuration
 public class WebSearchRAGChatClientConfig {
-
     @Bean
     public RetrievalAugmentationAdvisor webSearchRAGAdvisor(RestClient.Builder restClientBuilder) {
         return RetrievalAugmentationAdvisor.builder()

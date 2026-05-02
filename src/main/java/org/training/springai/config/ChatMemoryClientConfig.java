@@ -21,8 +21,6 @@ import org.training.springai.rag.SensitiveDataMaskingProcessor;
 
 @Configuration
 public class ChatMemoryClientConfig {
-
-
     @Value("classpath:prompts/hr-data-system-prompt.st")
     Resource hrPromptTemplate;
 
@@ -35,21 +33,22 @@ public class ChatMemoryClientConfig {
     public ChatClient chatMemoryClient(OpenAiChatModel openAiChatModel, ChatMemory chatMemory,
                                        RetrievalAugmentationAdvisor retrievalAugmentationAdvisor) {
 // automatically finds the bean of chat memory - if there is no DB dependency then  uses in memory hashmap
-        Advisor memoryAdvisor =  MessageChatMemoryAdvisor.builder(chatMemory).build();
+        Advisor memoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory).build();
         Advisor loggerAdvisor = new SimpleLoggerAdvisor();
         return ChatClient.builder(openAiChatModel)
                 .defaultAdvisors(loggerAdvisor, memoryAdvisor, new TokenUsageAuditAdvisor(), retrievalAugmentationAdvisor)
                 .build();
     }
 
-    @Bean     // advisor to retrieve some data from vector store
+    @Bean
+        // advisor to retrieve some data from vector store
     RetrievalAugmentationAdvisor retrievalAugmentationAdvisor(VectorStore vectorStore, OpenAiChatModel openAiChatModel) {
         return RetrievalAugmentationAdvisor.builder()
                 .queryTransformers(TranslationQueryTransformer.builder()
                         .chatClientBuilder(ChatClient.builder(openAiChatModel)).targetLanguage("English").build())
                 .documentRetriever(
                         VectorStoreDocumentRetriever.builder().vectorStore(vectorStore).topK(3).similarityThreshold(0.5).build()
-        ).documentPostProcessors(SensitiveDataMaskingProcessor.builder())
+                ).documentPostProcessors(SensitiveDataMaskingProcessor.builder())
                 .build();
     }
 }

@@ -14,11 +14,8 @@ import java.util.regex.Pattern;
  * Masks sensitive information (e.g., emails, phone numbers) in document content
  * to ensure privacy and compliance. Uses regex patterns to identify and redact PII.
  */
-
 @Slf4j
 public class SensitiveDataMaskingProcessor implements DocumentPostProcessor {
-
-
     // Regex patterns for common PII
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b",
@@ -26,7 +23,6 @@ public class SensitiveDataMaskingProcessor implements DocumentPostProcessor {
     private static final Pattern PHONE_PATTERN = Pattern.compile(
             "\\b(\\+?\\d{1,3}[-.\\s]?)?\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}\\b",
             Pattern.CASE_INSENSITIVE);
-
     private static final String EMAIL_REPLACEMENT = "[REDACTED_EMAIL]";
     private static final String PHONE_REPLACEMENT = "[REDACTED_PHONE]";
 
