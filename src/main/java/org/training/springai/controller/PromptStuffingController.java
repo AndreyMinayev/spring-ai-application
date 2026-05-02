@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.training.springai.controller.ControllerUtils.selectClient;
+
 @RestController
 @RequestMapping("/api")
 public class PromptStuffingController {
@@ -25,8 +27,8 @@ public class PromptStuffingController {
 
     @GetMapping("/stuffed-chat")
     public String stuffedChat(@RequestParam String message,
-                                @RequestParam(defaultValue = "ollama") String model) {
-        ChatClient client = "openai".equalsIgnoreCase(model) ? openAiChatClient : ollamaChatClient;
+                              @RequestParam(defaultValue = "ollama") String model) {
+        ChatClient client = selectClient(model, openAiChatClient, ollamaChatClient);
         return client.prompt()
                 .system(systemPromptTemplate)
                 .user(message)

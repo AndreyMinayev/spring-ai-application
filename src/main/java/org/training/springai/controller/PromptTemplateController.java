@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.training.springai.controller.ControllerUtils.selectClient;
+
 @RestController
 @RequestMapping("/api")
 public class PromptTemplateController {
@@ -26,7 +28,7 @@ public class PromptTemplateController {
     @GetMapping("/email")
     public String emailResponse(@RequestParam String customerName, @RequestParam String customerMessage,
                                 @RequestParam(defaultValue = "ollama") String model) {
-        ChatClient client = "openai".equalsIgnoreCase(model) ? openAiChatClient : ollamaChatClient;
+        ChatClient client = selectClient(model, openAiChatClient, ollamaChatClient);
         return client.prompt()
                 .system("You are professional service assistant witch helps drafting responses")
                 .user(promptUserSpec -> promptUserSpec.text(promptTemplate)

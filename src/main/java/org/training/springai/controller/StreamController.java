@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import static org.training.springai.controller.ControllerUtils.selectClient;
+
 @RestController
 @RequestMapping("/api")
 public class StreamController {
@@ -15,7 +17,7 @@ public class StreamController {
     private final ChatClient ollamaChatClient;
 
     public StreamController(@Qualifier("openAiChatClient") ChatClient openAiChatClient,
-                          @Qualifier("ollamaChatClient") ChatClient ollamaChatClient) {
+                            @Qualifier("ollamaChatClient") ChatClient ollamaChatClient) {
         this.openAiChatClient = openAiChatClient;
         this.ollamaChatClient = ollamaChatClient;
     }
@@ -23,7 +25,7 @@ public class StreamController {
     @GetMapping("/stream")
     public Flux<String> chat(@RequestParam String message,
                              @RequestParam(defaultValue = "ollama") String model) {
-        ChatClient client = "openai".equalsIgnoreCase(model) ? openAiChatClient : ollamaChatClient;
+        ChatClient client = selectClient(model, openAiChatClient, ollamaChatClient);
         return client.prompt()
                 .user(message)
                 .stream().content();
